@@ -1,1 +1,1 @@
-# MMNP: Multi-Modal Aided Negative Prototype for Few-Shot Open-Set Recognition
+# MMNP: Multi-Modal Negative Prototype for Few-Shot Open-Set Recognition
