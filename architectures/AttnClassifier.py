@@ -104,7 +104,7 @@ class Classifier(nn.Module):
         funit_distance = torch.cat([query_funit_distance,qopen_funit_distance],dim=1)
 
         return test_cosine_scores, supp_protos, fakeclass_protos, (base_weights,base_wgtmem), funit_distance, recip_unit
-
+        
     def init_representation(self, param_seman):
         (params,seman_dict) = param_seman
         ######################################
@@ -152,10 +152,7 @@ class OpenSetGenerater(nn.Module):
     def __init__(self, nway, featdim, n_head=1, neg_gen_type='semang', agg='avg'):
         super(OpenSetGenerater, self).__init__()
         self.nway = nway
-        self.att = MultiHeadAttention(featdim//n_head, featdim//n_head, (featdim,featdim))
-        #self.att2 = MultiHeadAttention(featdim//n_head, featdim//n_head, (featdim,featdim))
-        #self.calibrator = MultiHeadAttention(featdim//n_head, featdim//n_head, (featdim,featdim)
-
+        self.att = MultiHeadAttention(featdim//n_head, featdim//n_head, (featdim,featdim)
         self.featdim = featdim
 
         self.neg_gen_type = neg_gen_type
@@ -167,11 +164,6 @@ class OpenSetGenerater(nn.Module):
             self.agg_func3 = nn.Sequential(nn.Linear(featdim,featdim),nn.LeakyReLU(0.5),nn.Dropout(0.5),nn.Linear(featdim,featdim))
             self.agg_func4 = nn.Sequential(nn.Linear(featdim,featdim),nn.LeakyReLU(0.5),nn.Dropout(0.5),nn.Linear(featdim,featdim))
             self.agg_func5 = nn.Sequential(nn.Linear(featdim,featdim),nn.LeakyReLU(0.5),nn.Dropout(0.5),nn.Linear(featdim,featdim))
-            '''
-            self.agg_func6 = nn.Sequential(nn.Linear(featdim,featdim),nn.LeakyReLU(0.5),nn.Dropout(0.5),nn.Linear(featdim,featdim)) # 8NP for cifar
-            self.agg_func7 = nn.Sequential(nn.Linear(featdim,featdim),nn.LeakyReLU(0.5),nn.Dropout(0.5),nn.Linear(featdim,featdim)) # 8NP for cifar
-            self.agg_func8 = nn.Sequential(nn.Linear(featdim,featdim),nn.LeakyReLU(0.5),nn.Dropout(0.5),nn.Linear(featdim,featdim)) # 8NP for cifar
-            '''
         #self.map_sem = nn.Sequential(nn.Linear(300,300),nn.LeakyReLU(0.1),nn.Dropout(0.1),nn.Linear(300,300))
         #self.temp_agg_func = nn.Sequential(nn.Linear(featdim * 2,featdim),nn.Dropout(0.2),nn.Linear(featdim,featdim))
         #self.slf_attn_open =  MultiHeadAttention_GEL(1,featdim,featdim,featdim,dropout=0.5)
@@ -200,7 +192,6 @@ class OpenSetGenerater(nn.Module):
         base_mem_vis = base_open_weights
 
         #q,k-open,v-base
-        #这里修改为只使用open weights
         output, attcoef, attn_score, value = self.att(support_center, base_open_weights,base_open_weights,  support_seman, base_seman)
 
         #output = self.slf_attn_open(output,output,output)]
@@ -208,71 +199,14 @@ class OpenSetGenerater(nn.Module):
         
         fakeclass_center = output.mean(dim=1,keepdim=True) # mean of novel classes's NPs
 
-        
         if self.agg == 'mlp':#use multiple mlp to generate multiple NP
             fakeclass_center1 = self.agg_func1(fakeclass_center)
             fakeclass_center2 = self.agg_func2(fakeclass_center)
             fakeclass_center3 = self.agg_func3(fakeclass_center)
             fakeclass_center4 = self.agg_func4(fakeclass_center)
             fakeclass_center5 = self.agg_func5(fakeclass_center)
-            '''
-            fakeclass_center6 = self.agg_func6(fakeclass_center) # 8NP for cifar
-            fakeclass_center7 = self.agg_func7(fakeclass_center) # 8NP for cifar
-            fakeclass_center8 = self.agg_func8(fakeclass_center) # 8NP for cifar
-            #fakeclass_center = torch.cat((fakeclass_center1, fakeclass_center2, fakeclass_center3, fakeclass_center4, fakeclass_center5,fakeclass_center6,fakeclass_center7,fakeclass_center8), 1)8NP for cifar
-            '''
             fakeclass_center = torch.cat((fakeclass_center1, fakeclass_center2, fakeclass_center3, fakeclass_center4, fakeclass_center5), 1)
-
-        
         return fakeclass_center, output
-
-class MultiHeadAttention_GEL(nn.Module):
-    """ Multi-Head Attention module """
-
-    def __init__(self, n_head, d_model, d_k, d_v, dropout=0.1):
-        super().__init__()
-        self.n_head = n_head
-        self.d_k = d_k
-        self.d_v = d_v
-
-        self.w_qs = nn.Linear(d_model, n_head * d_k, bias=False)
-        self.w_ks = nn.Linear(d_model, n_head * d_k, bias=False)
-        self.w_vs = nn.Linear(d_model, n_head * d_v, bias=False)
-        nn.init.normal_(self.w_qs.weight, mean=0, std=np.sqrt(2.0 / (d_model + d_k)))
-        nn.init.normal_(self.w_ks.weight, mean=0, std=np.sqrt(2.0 / (d_model + d_k)))
-        nn.init.normal_(self.w_vs.weight, mean=0, std=np.sqrt(2.0 / (d_model + d_v)))
-
-        self.attention = ScaledDotProductAttention(temperature=np.power(d_k, 0.5))
-        self.layer_norm = nn.LayerNorm(d_model)
-
-        self.fc = nn.Linear(n_head * d_v, d_model)
-        nn.init.xavier_normal_(self.fc.weight)
-        self.dropout = nn.Dropout(dropout)
-
-    def forward(self, q, k, v):
-        d_k, d_v, n_head = self.d_k, self.d_v, self.n_head
-        sz_q, len_q, _ = q.size()
-        sz_b, len_k, _ = k.size()
-        sz_b, len_v, _ = v.size()
-
-        residual = q
-        q = self.w_qs(q).view(sz_q, len_q, n_head, d_k)
-        k = self.w_ks(k).view(sz_b, len_k, n_head, d_k)
-        v = self.w_vs(v).view(sz_b, len_v, n_head, d_v)
-
-        q = q.permute(2, 0, 1, 3).contiguous().view(-1, len_q, d_k)  # (n*b) x lq x dk
-        k = k.permute(2, 0, 1, 3).contiguous().view(-1, len_k, d_k)  # (n*b) x lk x dk
-        v = v.permute(2, 0, 1, 3).contiguous().view(-1, len_v, d_v)  # (n*b) x lv x dv
-
-        output, attn, log_attn = self.attention(q, k, v)
-
-        output = output.view(n_head, sz_q, len_q, d_v)
-        output = output.permute(1, 2, 0, 3).contiguous().view(sz_q, len_q, -1)  # b x lq x (n*dv)
-
-        output = self.dropout(self.fc(output))
-        output = self.layer_norm(output + residual)
-
-        return output
 class MultiHeadAttention_static(nn.Module):
     ''' Multi-Head Attention module '''
 
