@@ -7,10 +7,7 @@ import numpy as np
 from trainer.MetaTrainer import MetaTrainer
 from trainer.GMetaTrainer import GMetaTrainer
 from dataloader.dataloader import get_dataloaders
-from architectures.mix_test import saliencymix_test
-# import os
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  
-# os.environ['CUDA_VISIBLE_DEVICES'] = "3"  
+from architectures.mix_test import saliencymix_test 
 
 model_pool = ['ResNet18','ResNet12','WRN28']
 parser = argparse.ArgumentParser('argument for training')
@@ -36,13 +33,9 @@ parser.add_argument('--adam', action='store_true', help='use adam optimizer')
 parser.add_argument('--tunefeat', type=float, default=0.0001, help='update feature parameter')
 
 # Specify folder
-parser.add_argument('--logroot', type=str, default='/home/zzy/BNPG/DNPG_code/test_log', help='path to save model')
-parser.add_argument('--data_root', type=str, default='/home/zzy/FSL_dataset/miniImageNet', help='path to data root')
-parser.add_argument('--pretrained_model_path', type=str, default='/home/zzy/BNPG/DNPG_code/DNPG_check/miniImageNet_pre_with_open_weight.pth', help='path to pretrained model') #mini
-# parser.add_argument('--pretrained_model_path', type=str, default='/root/autodl-fs/CIFAR_Fix_RPL+_4C_nol2_adam_60epoch.pth', help='path to pretrained model') #cifar
-# parser.add_argument('--pretrained_model_path', type=str, default='/root/autodl-fs/Tir_fixedFeat_RPL+_max_meta_5shot.pth', help='path to pretrained model') #tier
-# parser.add_argument('--pretrained_model_path', type=str, default='/root/autodl-tmp/DNPG/pretrain/pretrain_openW/logs/FC100_40epoch.pth', help='path to pretrained model') #FC100
-
+parser.add_argument('--logroot', type=str, default='/home', help='path to save model')
+parser.add_argument('--data_root', type=str, default='/home', help='path to data root')
+parser.add_argument('--pretrained_model_path', type=str, default='/home', help='path to pretrained model') #mini
 # Meta Setting
 parser.add_argument('--n_ways', type=int, default=5, metavar='N', help='Number of classes for doing each classification run')
 parser.add_argument('--n_shots', type=int, default=1, metavar='N', help='Number of shots in test')
@@ -50,7 +43,7 @@ parser.add_argument('--n_queries', type=int, default=15, metavar='N', help='Numb
 parser.add_argument('--n_aug_support_samples', default=5, type=int, help='The number of augmented samples for each meta test sample')
 parser.add_argument('--n_train_para', type=int, default=2, metavar='train_batch_size', help='Size of training batch   ')
 parser.add_argument('--n_train_runs', type=int, default=300, help='Number of training episodes')
-parser.add_argument('--n_test_runs', type=int, default=600, metavar='N', help='Number of test runs')
+parser.add_argument('--n_test_runs', type=int, default=3000, metavar='N', help='Number of test runs')
 
 # Meta Control
 parser.add_argument('--train_weight_base', type=int, default=1, help='enable training base class weights')
@@ -75,11 +68,6 @@ parser.add_argument('--mode', type=str, default='clip',
 parser.add_argument('--text_type', type=str, default='gpt',
                         choices=['gpt', 'name', 'definition'])
 parser.add_argument('--n_class', type=int, default=64)#teried 351
-# parser.add_argument('--RPL_loss_temp', type=float, default=0.3)
-# parser.add_argument('--RPL_half_flag', type=int, default=0)
-# parser.add_argument('--open_weight_sum_cali', type=float, default=0.03)
-# parser.add_argument('--bpr_mix_keep_rate', type=float, default=0.6)
-# parser.add_argument('--trplet_loss_alpha', type=float, default=0.03)
 
 if __name__ == "__main__":
     torch.manual_seed(3407)
