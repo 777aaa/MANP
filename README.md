@@ -1,1 +1,1 @@
-# MANP: Multi-Modal Aided Negative Prototype for Few-Shot Open-Set Recognition
+# MMNP: Multi-Modal Aided Negative Prototype for Few-Shot Open-Set Recognition
