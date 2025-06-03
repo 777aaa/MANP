@@ -11,9 +11,6 @@ from trainer.FSEval import run_test_fsl
 from trainer.GFSEval import run_test_gfsl
 import pdb
 import logging
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  #（保证程序cuda序号与实际cuda序号对应）
-# os.environ['CUDA_VISIBLE_DEVICES'] = "2"  #（代表仅使用第0，1号GPU）
-
 
 
 model_pool = ['ResNet18','ResNet12','WRN28']
@@ -30,10 +27,9 @@ parser.add_argument('--gpus', type=str, default='0')
 # Specify folder
 parser.add_argument('--logroot', type=str, default='./logs/', help='path to save model')
 
-parser.add_argument('--data_root', type=str, default='/home/zzy/FSL_dataset/miniImageNet', help='path to data root')
-parser.add_argument('--pretrained_model_path', type=str, default='/home/zzy/BNPG/DNPG_code/DNPG_check/miniImageNet_phase2_checkpoint.pth', help='path to pretrained model')
-#parser.add_argument('--pretrained_model_path', type=str, default='/root/autodl-fs/Tir_fixedFeat_RPL+_max_meta_5shot.pth', help='path to pretrained model') #tier
-parser.add_argument('--test_model_path', type=str, default='/home/zzy/BNPG/DNPG_code/log/OpenMeta_miniImageNet/mini_55.pth')
+parser.add_argument('--data_root', type=str, default='/home', help='path to data root')
+parser.add_argument('--pretrained_model_path', type=str, default='/home', help='path to pretrained model')
+parser.add_argument('--test_model_path', type=str, default='/home')
 # Meta Setting
 parser.add_argument('--n_ways', type=int, default=5, metavar='N', help='Number of classes for doing each classification run')
 parser.add_argument('--n_open_ways', type=int, default=5, metavar='N', help='Number of classes for doing each classification run')
@@ -42,7 +38,7 @@ parser.add_argument('--n_queries', type=int, default=15, metavar='N', help='Numb
 parser.add_argument('--n_aug_support_samples', default=5, type=int, help='The number of augmented samples for each meta test sample')
 parser.add_argument('--n_train_para', type=int, default=2, metavar='test_batch_size', help='Size of test batch)')
 parser.add_argument('--n_train_runs', type=int, default=300, help='Number of training episodes')
-parser.add_argument('--n_test_runs', type=int, default=1000, metavar='N', help='Number of test runs')
+parser.add_argument('--n_test_runs', type=int, default=3000, metavar='N', help='Number of test runs')
 
 # Network Flow Path
 parser.add_argument('--gamma', type=float, default=2.0, help='loss cofficient for open-mse loss')
@@ -70,11 +66,6 @@ parser.add_argument('--mode', type=str, default='clip',
 parser.add_argument('--text_type', type=str, default='gpt',
                         choices=['gpt', 'name', 'definition'])
 parser.add_argument('--n_class', type=int, default=64)#teried 351
-#parser.add_argument('--RPL_loss_temp', type=float, default=0.3)
-#parser.add_argument('--RPL_half_flag', type=int, default=0)
-#parser.add_argument('--open_weight_sum_cali', type=float, default=0.1)
-#parser.add_argument('--bpr_mix_keep_rate', type=float, default=0.6)
-#parser.add_argument('--trplet_loss_alpha', type=float, default=0.01)
 
 args = parser.parse_args()
 
