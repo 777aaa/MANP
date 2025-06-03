@@ -153,13 +153,11 @@ class BaseTrainer(object):
                     x, y = model(data)
                 
                     # 计算融合特征和分类器输出
-                    #fusion_feature,cls_logit = self.fusion(text_feature, x)
-                    #这里要不要考虑针对融合加权后的特征去训练两个权重呢
-                    #消融-openweights不用多模态信息
-                    logits, loss = criterion_cls(x, y, labels)
+                    fusion_feature,cls_logit = self.fusion(text_feature, x)
+                    logits, loss = criterion_cls(fusion_feature, cls_logit, labels)
                     ##################
 
-                    logits2, loss2 = criterion_open(x, y, labels,epoch=epoch)
+                    logits2, loss2 = criterion_open(fusion_feature, cls_logit, labels,epoch=epoch)
                     loss += loss2
                     ##################
                     #loss = criterion_cls['logit'](y, labels)
