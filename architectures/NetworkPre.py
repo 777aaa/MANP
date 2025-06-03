@@ -154,7 +154,6 @@ class FeatureNet(nn.Module):
         test12 = torch.bmm(supp_protos1,fakeclass_protos_aug.transpose(1,2))
         test12,_ = torch.max(test12,dim=-1)
         test12 = test12.mean() 
-
         # task1's NP to find max in task2
         test21 = torch.bmm(fakeclass_protos1, supp_protos_aug.transpose(1,2))
         test21,_ = torch.max(test21,dim=-1)
@@ -165,8 +164,7 @@ class FeatureNet(nn.Module):
 
         # SA module loss
         loss_open_hinge =  (- test11 - test12 - test21 - test22) / 2
-
-
+ 
         
         loss = (loss_cls+loss_cls_aug  , loss_open_hinge, loss_funit+loss_funit_aug )
         return test_feats, cls_protos, test_cls_probs, loss
